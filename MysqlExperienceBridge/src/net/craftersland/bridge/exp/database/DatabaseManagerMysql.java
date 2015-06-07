@@ -47,8 +47,11 @@ public class DatabaseManagerMysql {
 	            dbUser = exp.getConfigHandler().getString("database.mysql.user");
 	            dbPassword = exp.getConfigHandler().getString("database.mysql.password");
 	            
+	            String passFix = dbPassword.replaceAll("%", "%25");
+	            String passFix2 = passFix.replaceAll("\\+", "%2B");
+	            
 	            //Connect to database
-	            conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":" + dbPort + "/" + database + "?" + "user=" + dbUser + "&" + "password=" + dbPassword);
+	            conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":" + dbPort + "/" + database + "?" + "user=" + dbUser + "&" + "password=" + passFix2);
 	           
 	          } catch (ClassNotFoundException e) {
 	        	  Exp.log.severe("Could not locate drivers for mysql!");

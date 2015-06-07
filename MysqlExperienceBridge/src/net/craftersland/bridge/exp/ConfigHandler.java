@@ -23,7 +23,7 @@ public class ConfigHandler {
 	
 	public String getString(String key) {
 		if (!exp.getConfig().contains(key)) {
-			exp.getLogger().severe("Could not locate '"+key+"' in the config.yml inside of the MysqlEconomyBridge folder! (Try generating a new one by deleting the current)");
+			exp.getLogger().severe("Could not locate '"+key+"' in the config.yml inside of the MysqlExperienceBridge folder! (Try generating a new one by deleting the current)");
 			return "errorCouldNotLocateInConfigYml:"+key;
 		} else {
 			return exp.getConfig().getString(key);
