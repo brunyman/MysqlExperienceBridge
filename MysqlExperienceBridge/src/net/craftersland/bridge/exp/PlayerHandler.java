@@ -26,11 +26,11 @@ public class PlayerHandler implements Listener {
 		delay = Integer.parseInt(exp.getConfigHandler().getString("General.loginSyncDelay")) / 1000;
 				
 		//Added a small delay to prevent the onDisconnect handler overlapping onLogin on a BungeeCord configuration when switching servers.
-				Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(exp, new Runnable() {
+				Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(exp, new Runnable() {
 					
 					@Override
 					public void run() {
-						Player p = Bukkit.getPlayer(event.getUniqueId());
+						final Player p = Bukkit.getPlayer(event.getUniqueId());
 						UUID playerUUID = event.getUniqueId();
 						
 						try {
@@ -39,21 +39,26 @@ public class PlayerHandler implements Listener {
 							return;
 						}
 						
-						float mysqlExp = exp.getExpMysqlInterface().getExp(playerUUID);
-						int mysqlTotalExp = exp.getExpMysqlInterface().getTotalExp(playerUUID);
-						int mysqlLvl = exp.getExpMysqlInterface().getLvl(playerUUID);
+						final float mysqlExp = exp.getExpMysqlInterface().getExp(playerUUID);
+						final int mysqlTotalExp = exp.getExpMysqlInterface().getTotalExp(playerUUID);
+						final int mysqlLvl = exp.getExpMysqlInterface().getLvl(playerUUID);
 						
 						if (mysqlExp == 0 && mysqlTotalExp == 0) return;
 						
-						p.setExp(mysqlExp);
-						p.setTotalExperience(mysqlTotalExp);
-						p.setLevel(mysqlLvl);
-						
-						if (p.getTotalExperience() != mysqlTotalExp || p.getTotalExperience() != mysqlTotalExp) {
-							p.setExp(mysqlExp);
-							p.setTotalExperience(mysqlTotalExp);
-							p.setLevel(mysqlLvl);
-						}
+						Bukkit.getScheduler().runTask(exp, new Runnable() {
+							@Override
+							public void run() {
+								p.setExp(mysqlExp);
+								p.setTotalExperience(mysqlTotalExp);
+								p.setLevel(mysqlLvl);
+								
+								if (p.getTotalExperience() != mysqlTotalExp || p.getTotalExperience() != mysqlTotalExp) {
+									p.setExp(mysqlExp);
+									p.setTotalExperience(mysqlTotalExp);
+									p.setLevel(mysqlLvl);
+								}
+							}
+						});
 						
 						exp.getExpMysqlInterface().setExperience(playerUUID, p, 0.00f, 0, 0, 0);
 					}
@@ -63,15 +68,20 @@ public class PlayerHandler implements Listener {
 	
 	@EventHandler
 	public void onDisconnect(PlayerQuitEvent event) {
-		Player p = event.getPlayer();
-		float experience = p.getExp();
-		int expToLevel = p.getExpToLevel();
-		int totalExp = p.getTotalExperience();
-		int lvl = p.getLevel();
+		final Player p = event.getPlayer();
+		final float experience = p.getExp();
+		final int expToLevel = p.getExpToLevel();
+		final int totalExp = p.getTotalExperience();
+		final int lvl = p.getLevel();
 		
 		if (experience == 0 && totalExp == 0) return;
 		
-		exp.getExpMysqlInterface().setExperience(p.getUniqueId(), p, experience, expToLevel, totalExp, lvl);
+		Bukkit.getScheduler().runTaskAsynchronously(exp, new Runnable() {
+			@Override
+			public void run() {
+				exp.getExpMysqlInterface().setExperience(p.getUniqueId(), p, experience, expToLevel, totalExp, lvl);
+			}
+		});
 		
 		p.setExp(0);
 		p.setTotalExperience(0);

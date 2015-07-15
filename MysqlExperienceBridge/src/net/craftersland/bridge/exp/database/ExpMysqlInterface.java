@@ -22,7 +22,7 @@ public class ExpMysqlInterface {
 	}
 	
 	public boolean hasAccount(UUID player) {
-		
+		exp.getDatabaseManager().checkConnection();
 	      try {
 	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 	 
@@ -37,12 +37,13 @@ public class ExpMysqlInterface {
 	        	return true;
 	        }
 	      } catch (SQLException e) {
-	        e.printStackTrace();
+	        Exp.log.severe("Error: " + e.getMessage());
 	      }
 	      return false;
     }
 	
 	public boolean createAccount(UUID player, Player name) {
+		exp.getDatabaseManager().checkConnection();
 		try {
 			tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 			 
@@ -59,12 +60,12 @@ public class ExpMysqlInterface {
 	        preparedStatement.setInt(4, 0);
 	        preparedStatement.setInt(5, 0);
 	        preparedStatement.setInt(6, 0);
-	        preparedStatement.setString(7, String.valueOf(name.getLastPlayed()) + "");
+	        preparedStatement.setString(7, String.valueOf(System.currentTimeMillis()));
 	        
 	        preparedStatement.executeUpdate();
 	        return true;
 	      } catch (SQLException e) {
-	        e.printStackTrace();
+	    	  Exp.log.severe("Error: " + e.getMessage());
 	      }
 		return false;
 	}
@@ -87,7 +88,7 @@ public class ExpMysqlInterface {
 	        	return result.getFloat("exp");
 	        }
 	      } catch (SQLException e) {
-	        e.printStackTrace();
+	    	  Exp.log.severe("Error: " + e.getMessage());
 	      }
 		return null;
 	}
@@ -110,7 +111,7 @@ public class ExpMysqlInterface {
 	        	return result.getInt("exp_lvl");
 	        }
 	      } catch (SQLException e) {
-	        e.printStackTrace();
+	    	  Exp.log.severe("Error: " + e.getMessage());
 	      }
 		return null;
 	}
@@ -133,7 +134,7 @@ public class ExpMysqlInterface {
 	        	return result.getInt("total_exp");
 	        }
 	      } catch (SQLException e) {
-	        e.printStackTrace();
+	    	  Exp.log.severe("Error: " + e.getMessage());
 	      }
 		return null;
 	}
@@ -153,13 +154,13 @@ public class ExpMysqlInterface {
 			preparedUpdateStatement.setInt(3, expToLevel);
 			preparedUpdateStatement.setInt(4, totalExp);
 			preparedUpdateStatement.setInt(5, lvl);
-			preparedUpdateStatement.setString(6, String.valueOf(name.getLastPlayed()) + "");
+			preparedUpdateStatement.setString(6, String.valueOf(System.currentTimeMillis()));
 			preparedUpdateStatement.setString(7, player.toString() + "");
 			
 			preparedUpdateStatement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Exp.log.severe("Error: " + e.getMessage());
 		}
         return false;
 	}

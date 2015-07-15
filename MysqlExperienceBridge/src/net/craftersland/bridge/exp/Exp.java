@@ -1,11 +1,14 @@
 package net.craftersland.bridge.exp;
 
 import java.io.File;
+import java.sql.PreparedStatement;
 import java.util.logging.Logger;
 
 import net.craftersland.bridge.exp.database.DatabaseManagerMysql;
 import net.craftersland.bridge.exp.database.ExpMysqlInterface;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -39,6 +42,10 @@ public class Exp extends JavaPlugin {
             return;
     	}
     	
+    	if (getConfigHandler().getString("database.maintenance.enabled").matches("true")) {
+    		runMaintenance();
+    	}
+    	
     	//Register Listeners
     	PluginManager pm = getServer().getPluginManager();
     	pm.registerEvents(new PlayerHandler(this), this);
@@ -51,6 +58,7 @@ public class Exp extends JavaPlugin {
 		if (this.isEnabled()) {
 			//Closing database connection
 			if (databaseManager.getConnection() != null) {
+				savePlayerData();
 				log.info("Closing MySQL connection...");
 				databaseManager.closeDatabase();
 			}
@@ -69,5 +77,44 @@ public class Exp extends JavaPlugin {
 	public ExpMysqlInterface getExpMysqlInterface() {
 		return expMysqlInterface;
 	}
+	
+    public void runMaintenance() {
+		
+		Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+			@Override
+			public void run() {
+				if (databaseManager.getConnection() == null) return;
+				getDatabaseManager().checkConnection();
+				log.info("Database maintenance task started...");
+				
+				long inactivityDays = Long.parseLong(getConfigHandler().getString("database.maintenance.inactivity"));
+				long inactivityMils = inactivityDays * 24 * 60 * 60 * 1000;
+				long curentTime = System.currentTimeMillis();
+				long inactiveTime = curentTime - inactivityMils;
+				String tableName = getConfigHandler().getString("database.mysql.tableName");
+				
+				try {
+					String sql = "DELETE FROM `" + tableName + "` WHERE `last_seen` <?";
+					PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql);
+					preparedStatement.setString(1, String.valueOf(inactiveTime));
+					
+					preparedStatement.executeUpdate();
+				} catch (Exception e) {
+					log.severe("Error: " + e.getMessage());
+				}
+				
+				log.info("Database maintenance task ended.");
+			}
+		}, 400L);	
+	}
+    
+    private void savePlayerData() {
+    	if (Bukkit.getOnlinePlayers().isEmpty() == true) return;
+		if (databaseManager.checkConnection() == false) return;
+		log.info("Saving players data...");
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			getExpMysqlInterface().setExperience(p.getUniqueId(), p, p.getExp(), p.getExpToLevel(), p.getTotalExperience(), p.getLevel());
+		}
+    }
 
 }
