@@ -78,6 +78,7 @@ public class DatabaseManagerMysql {
 		}
 		
 		public Connection getConnection() {
+			checkConnection();
 			return conn;
 		}
 		
@@ -95,32 +96,30 @@ public class DatabaseManagerMysql {
 		public boolean checkConnection() {
 			try {
 				if (conn == null) {
-					return reConnect();
-				}
-				if (conn.isClosed() == true) {
-					return reConnect();
+					Exp.log.warning("Connection failed. Reconnecting...");
+					if (reConnect() == true) return true;
+					return false;
 				}
 				if (!conn.isValid(3)) {
-					return reConnect();
+					Exp.log.warning("Connection is idle or terminated. Reconnecting...");
+					if (reConnect() == true) return true;
+					return false;
 				}
 				if (conn.isClosed() == true) {
-					return reConnect();
+					Exp.log.warning("Connection is closed. Reconnecting...");
+					if (reConnect() == true) return true;
+					return false;
 				}
 				return true;
 			} catch (Exception e) {
 				Exp.log.severe("Could not reconnect to Database!");
 			}
-			return false;
+			return true;
 		}
 		
-		private boolean reConnect() {
+		public boolean reConnect() {
 			try {
-				if (conn != null) conn.close();
-				Exp.log.warning("MySQL database connection lost! Re-connecting...");
-				//Load Drivers
-	            Class.forName("com.mysql.jdbc.Driver");
-	            
-	            dbHost = exp.getConfigHandler().getString("database.mysql.host");
+				dbHost = exp.getConfigHandler().getString("database.mysql.host");
 	            dbPort = exp.getConfigHandler().getString("database.mysql.port");
 	            database = exp.getConfigHandler().getString("database.mysql.databaseName");
 	            dbUser = exp.getConfigHandler().getString("database.mysql.user");
@@ -129,14 +128,21 @@ public class DatabaseManagerMysql {
 	            String passFix = dbPassword.replaceAll("%", "%25");
 	            String passFix2 = passFix.replaceAll("\\+", "%2B");
 	            
-	            //Connect to database
-	            conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":" + dbPort + "/" + database + "?" + "user=" + dbUser + "&" + "password=" + passFix2);
-	            Exp.log.info("Mysql re-connected succesful!");
+	            long start = 0;
+				long end = 0;
+				
+			    start = System.currentTimeMillis();
+			    Exp.log.info("Attempting to establish a connection to the MySQL server!");
+			    Class.forName("com.mysql.jdbc.Driver");
+			    conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":" + dbPort + "/" + database + "?" + "user=" + dbUser + "&" + "password=" + passFix2);
+			    end = System.currentTimeMillis();
+			    Exp.log.info("Connection to MySQL server established!");
+			    Exp.log.info("Connection took " + ((end - start)) + "ms!");
 	            return true;
 			} catch (Exception e) {
-				Exp.log.severe("Could not re-connect to MySQL Database. Error: " + e.getMessage());
+				Exp.log.severe("Could not connect to MySQL server! because: " + e.getMessage());
+				return false;
 			}
-			return false;
 		}
 
 }

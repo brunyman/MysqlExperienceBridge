@@ -18,11 +18,10 @@ public class ExpMysqlInterface {
 	
 	public ExpMysqlInterface(Exp exp) {
 		this.exp = exp;
-		this.conn = ((DatabaseManagerMysql)exp.getDatabaseManager()).getConnection();
 	}
 	
 	public boolean hasAccount(UUID player) {
-		exp.getDatabaseManager().checkConnection();
+		conn = exp.getDatabaseManager().getConnection();
 	      try {
 	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 	 
@@ -43,7 +42,7 @@ public class ExpMysqlInterface {
     }
 	
 	public boolean createAccount(UUID player, Player name) {
-		exp.getDatabaseManager().checkConnection();
+		conn = exp.getDatabaseManager().getConnection();
 		try {
 			tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 			 
@@ -74,7 +73,7 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		
+		conn = exp.getDatabaseManager().getConnection();
 	      try {
 	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 	 
@@ -97,7 +96,7 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		
+		conn = exp.getDatabaseManager().getConnection();
 	      try {
 	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 	 
@@ -120,7 +119,7 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		
+		conn = exp.getDatabaseManager().getConnection();
 	      try {
 	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
 	 
@@ -143,7 +142,7 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, name);
 		}
-		
+		conn = exp.getDatabaseManager().getConnection();
         try {
         	tableName = exp.getConfigHandler().getString("database.mysql.tableName");
         	

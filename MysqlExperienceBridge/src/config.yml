@@ -1,5 +1,5 @@
 # default config.yml for MysqlExperienceBridge
-# config version 1.2
+# config version 1.2.1
 
 #MySQL Database details
 database:
@@ -29,3 +29,5 @@ General:
     #Login economy sync delay in milliseconds (default 1000 milliseconds = 1 second)
     #This delay is needed in bungeecord setups, because when you move between servers the quit and login takes place almost in the same time.
     loginSyncDelay: 1000
+    #Disable setting the exp to 0 after player leaves the server.
+    disableExpClear: false

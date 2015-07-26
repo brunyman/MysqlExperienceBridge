@@ -1,6 +1,6 @@
 name: MysqlExperienceBridge
 main: net.craftersland.bridge.exp.Exp
-version: 1.2
+version: 1.2.1
 author: CraftersLand
 website: www.craftersland.net
 load: STARTUP

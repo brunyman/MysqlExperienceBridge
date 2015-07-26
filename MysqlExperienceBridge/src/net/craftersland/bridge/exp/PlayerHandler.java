@@ -57,6 +57,7 @@ public class PlayerHandler implements Listener {
 									p.setTotalExperience(mysqlTotalExp);
 									p.setLevel(mysqlLvl);
 								}
+								exp.playersSync.put(p.getName(), true);
 							}
 						});
 						
@@ -69,6 +70,7 @@ public class PlayerHandler implements Listener {
 	@EventHandler
 	public void onDisconnect(PlayerQuitEvent event) {
 		final Player p = event.getPlayer();
+		if (exp.playersSync.containsKey(p.getName()) == false) return;
 		final float experience = p.getExp();
 		final int expToLevel = p.getExpToLevel();
 		final int totalExp = p.getTotalExperience();
@@ -82,15 +84,16 @@ public class PlayerHandler implements Listener {
 				exp.getExpMysqlInterface().setExperience(p.getUniqueId(), p, experience, expToLevel, totalExp, lvl);
 			}
 		});
-		
-		p.setExp(0);
-		p.setTotalExperience(0);
-		p.setLevel(0);
-		
-		if (p.getTotalExperience() != 0) {
+		if (exp.getConfigHandler().getString("General.disableExpClear").matches("false")) {
 			p.setExp(0);
 			p.setTotalExperience(0);
 			p.setLevel(0);
+			
+			if (p.getTotalExperience() != 0) {
+				p.setExp(0);
+				p.setTotalExperience(0);
+				p.setLevel(0);
+			}
 		}
 	}
 

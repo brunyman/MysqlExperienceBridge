@@ -2,6 +2,7 @@ package net.craftersland.bridge.exp;
 
 import java.io.File;
 import java.sql.PreparedStatement;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import net.craftersland.bridge.exp.database.DatabaseManagerMysql;
@@ -15,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Exp extends JavaPlugin {
 	
 	public static Logger log;
+	public HashMap<String, Boolean> playersSync = new HashMap<String, Boolean>();
 	
 	private ConfigHandler configHandler;
 	private DatabaseManagerMysql databaseManager;
@@ -84,7 +86,6 @@ public class Exp extends JavaPlugin {
 			@Override
 			public void run() {
 				if (databaseManager.getConnection() == null) return;
-				getDatabaseManager().checkConnection();
 				log.info("Database maintenance task started...");
 				
 				long inactivityDays = Long.parseLong(getConfigHandler().getString("database.maintenance.inactivity"));
@@ -110,9 +111,9 @@ public class Exp extends JavaPlugin {
     
     private void savePlayerData() {
     	if (Bukkit.getOnlinePlayers().isEmpty() == true) return;
-		if (databaseManager.checkConnection() == false) return;
 		log.info("Saving players data...");
 		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (playersSync.containsKey(p.getName()) == false) return;
 			getExpMysqlInterface().setExperience(p.getUniqueId(), p, p.getExp(), p.getExpToLevel(), p.getTotalExperience(), p.getLevel());
 		}
     }
