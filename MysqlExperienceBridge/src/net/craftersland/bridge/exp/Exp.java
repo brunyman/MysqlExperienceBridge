@@ -21,6 +21,7 @@ public class Exp extends JavaPlugin {
 	private ConfigHandler configHandler;
 	private DatabaseManagerMysql databaseManager;
 	private ExpMysqlInterface expMysqlInterface;
+	private boolean enabled = false;
 	
 	@Override
     public void onEnable() {
@@ -51,13 +52,13 @@ public class Exp extends JavaPlugin {
     	//Register Listeners
     	PluginManager pm = getServer().getPluginManager();
     	pm.registerEvents(new PlayerHandler(this), this);
-    	
+    	enabled = true;
     	log.info("MysqlExperienceBridge has been successfully loaded!");
 	}
 	
 	@Override
     public void onDisable() {
-		if (this.isEnabled()) {
+		if (enabled == true) {
 			//Closing database connection
 			if (databaseManager.getConnection() != null) {
 				savePlayerData();
