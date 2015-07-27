@@ -21,7 +21,11 @@ public class PlayerHandler implements Listener {
 	@EventHandler
 	public void onLogin(final AsyncPlayerPreLoginEvent event) {
 		//Check if player has a MySQL account first
-		if (exp.getExpMysqlInterface().hasAccount(event.getUniqueId()) == false) return;
+		if (exp.getExpMysqlInterface().hasAccount(event.getUniqueId()) == false) {
+			Player p = Bukkit.getPlayer(event.getUniqueId());
+			exp.playersSync.put(p.getName(), true);
+			return;
+		}
 		
 		delay = Integer.parseInt(exp.getConfigHandler().getString("General.loginSyncDelay")) / 1000;
 				
