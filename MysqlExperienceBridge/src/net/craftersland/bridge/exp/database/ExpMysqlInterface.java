@@ -13,42 +13,46 @@ import net.craftersland.bridge.exp.Exp;
 public class ExpMysqlInterface {
 	
 	private Exp exp;
-	private Connection conn;
-	private String tableName = "meb_experience";
 	
 	public ExpMysqlInterface(Exp exp) {
 		this.exp = exp;
 	}
 	
 	public boolean hasAccount(UUID player) {
-		conn = exp.getDatabaseManager().getConnection();
-	      try {
-	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-	 
-	        String sql = "SELECT `player_uuid` FROM `" + tableName + "` WHERE `player_uuid` = ?";
-	        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
+		PreparedStatement preparedUpdateStatement = null;
+		ResultSet result = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
+	      try {	 
+	        String sql = "SELECT `player_uuid` FROM `" + exp.getConfigHandler().getString("database.mysql.tableName") + "` WHERE `player_uuid` = ?";
+	        preparedUpdateStatement = conn.prepareStatement(sql);
 	        preparedUpdateStatement.setString(1, player.toString());
-	        
-	        
-	        ResultSet result = preparedUpdateStatement.executeQuery();
-	 
+	        result = preparedUpdateStatement.executeQuery();
 	        while (result.next()) {
 	        	return true;
 	        }
 	      } catch (SQLException e) {
 	        Exp.log.severe("Error: " + e.getMessage());
-	      }
+	      } finally {
+		    	try {
+		    		if (result != null) {
+		    			result.close();
+		    		}
+		    		if (preparedUpdateStatement != null) {
+		    			preparedUpdateStatement.close();
+		    		}
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+		    }
 	      return false;
     }
 	
-	public boolean createAccount(UUID player, Player name) {
-		conn = exp.getDatabaseManager().getConnection();
-		try {
-			tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-			 
-	        String sql = "INSERT INTO `" + tableName + "`(`player_uuid`, `player_name`, `exp`, `exp_to_level`, `total_exp`, `exp_lvl`, `last_seen`) " + "VALUES(?, ?, ?, ?, ?, ?, ?)";
-	        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-	        
+	public void createAccount(UUID player, Player name) {
+		PreparedStatement preparedStatement = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
+		try {			 
+	        String sql = "INSERT INTO `" + exp.getConfigHandler().getString("database.mysql.tableName") + "`(`player_uuid`, `player_name`, `exp`, `exp_to_level`, `total_exp`, `exp_lvl`, `last_seen`) " + "VALUES(?, ?, ?, ?, ?, ?, ?)";
+	        preparedStatement = conn.prepareStatement(sql);
 	        preparedStatement.setString(1, player.toString() + "");
 	        if (name == null) {
 	        	preparedStatement.setString(2, "none");
@@ -60,35 +64,49 @@ public class ExpMysqlInterface {
 	        preparedStatement.setInt(5, 0);
 	        preparedStatement.setInt(6, 0);
 	        preparedStatement.setString(7, String.valueOf(System.currentTimeMillis()));
-	        
 	        preparedStatement.executeUpdate();
-	        return true;
 	      } catch (SQLException e) {
 	    	  Exp.log.severe("Error: " + e.getMessage());
+	      } finally {
+	    	  try {
+	    		  if (preparedStatement != null) {
+	    			  preparedStatement.close();
+	    		  }
+	    	  } catch (Exception e) {
+	    		  e.printStackTrace();
+	    	  }
 	      }
-		return false;
 	}
 	
 	public Float getExp(UUID player) {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		conn = exp.getDatabaseManager().getConnection();
+		PreparedStatement preparedUpdateStatement = null;
+		ResultSet result = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
 	      try {
-	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-	 
-	        String sql = "SELECT `exp` FROM `" + tableName + "` WHERE `player_uuid` = ?";
-	        
-	        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
+	        String sql = "SELECT `exp` FROM `" + exp.getConfigHandler().getString("database.mysql.tableName") + "` WHERE `player_uuid` = ?";
+	        preparedUpdateStatement = conn.prepareStatement(sql);
 	        preparedUpdateStatement.setString(1, player.toString());
-	        ResultSet result = preparedUpdateStatement.executeQuery();
-	 
+	        result = preparedUpdateStatement.executeQuery();
 	        while (result.next()) {
 	        	return result.getFloat("exp");
 	        }
 	      } catch (SQLException e) {
 	    	  Exp.log.severe("Error: " + e.getMessage());
-	      }
+	      } finally {
+		    	try {
+		    		if (result != null) {
+		    			result.close();
+		    		}
+		    		if (preparedUpdateStatement != null) {
+		    			preparedUpdateStatement.close();
+		    		}
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+		    }
 		return null;
 	}
 	
@@ -96,22 +114,31 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		conn = exp.getDatabaseManager().getConnection();
+		PreparedStatement preparedUpdateStatement = null;
+		ResultSet result = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
 	      try {
-	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-	 
-	        String sql = "SELECT `exp_lvl` FROM `" + tableName + "` WHERE `player_uuid` = ?";
-	        
-	        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
+	        String sql = "SELECT `exp_lvl` FROM `" + exp.getConfigHandler().getString("database.mysql.tableName") + "` WHERE `player_uuid` = ?";
+	        preparedUpdateStatement = conn.prepareStatement(sql);
 	        preparedUpdateStatement.setString(1, player.toString());
-	        ResultSet result = preparedUpdateStatement.executeQuery();
-	 
+	        result = preparedUpdateStatement.executeQuery();
 	        while (result.next()) {
 	        	return result.getInt("exp_lvl");
 	        }
 	      } catch (SQLException e) {
 	    	  Exp.log.severe("Error: " + e.getMessage());
-	      }
+	      } finally {
+		    	try {
+		    		if (result != null) {
+		    			result.close();
+		    		}
+		    		if (preparedUpdateStatement != null) {
+		    			preparedUpdateStatement.close();
+		    		}
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+		    }
 		return null;
 	}
 	
@@ -119,22 +146,31 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, null);
 		}
-		conn = exp.getDatabaseManager().getConnection();
-	      try {
-	    	  tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-	 
-	        String sql = "SELECT `total_exp` FROM `" + tableName + "` WHERE `player_uuid` = ?";
-	        
-	        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
+		PreparedStatement preparedUpdateStatement = null;
+		ResultSet result = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
+	      try {	 
+	        String sql = "SELECT `total_exp` FROM `" + exp.getConfigHandler().getString("database.mysql.tableName") + "` WHERE `player_uuid` = ?";
+	        preparedUpdateStatement = conn.prepareStatement(sql);
 	        preparedUpdateStatement.setString(1, player.toString());
-	        ResultSet result = preparedUpdateStatement.executeQuery();
-	 
+	        result = preparedUpdateStatement.executeQuery();
 	        while (result.next()) {
 	        	return result.getInt("total_exp");
 	        }
 	      } catch (SQLException e) {
 	    	  Exp.log.severe("Error: " + e.getMessage());
-	      }
+	      } finally {
+		    	try {
+		    		if (result != null) {
+		    			result.close();
+		    		}
+		    		if (preparedUpdateStatement != null) {
+		    			preparedUpdateStatement.close();
+		    		}
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+		    }
 		return null;
 	}
 	
@@ -142,12 +178,11 @@ public class ExpMysqlInterface {
 		if (!hasAccount(player)) {
 			createAccount(player, name);
 		}
-		conn = exp.getDatabaseManager().getConnection();
+		PreparedStatement preparedUpdateStatement = null;
+		Connection conn = exp.getDatabaseManager().getConnection();
         try {
-        	tableName = exp.getConfigHandler().getString("database.mysql.tableName");
-        	
-			String updateSqlExp = "UPDATE `" + tableName + "` " + "SET `player_name` = ?" + ", `exp` = ?" + ", `exp_to_level` = ?" + ", `total_exp` = ?" + ", `exp_lvl` = ?" + ", `last_seen` = ?" + " WHERE `player_uuid` = ?";
-			PreparedStatement preparedUpdateStatement = conn.prepareStatement(updateSqlExp);
+			String updateSqlExp = "UPDATE `" + exp.getConfigHandler().getString("database.mysql.tableName") + "` " + "SET `player_name` = ?" + ", `exp` = ?" + ", `exp_to_level` = ?" + ", `total_exp` = ?" + ", `exp_lvl` = ?" + ", `last_seen` = ?" + " WHERE `player_uuid` = ?";
+			preparedUpdateStatement = conn.prepareStatement(updateSqlExp);
 			preparedUpdateStatement.setString(1, name.getName().toString() + "");
 			preparedUpdateStatement.setFloat(2, experience);
 			preparedUpdateStatement.setInt(3, expToLevel);
@@ -155,11 +190,18 @@ public class ExpMysqlInterface {
 			preparedUpdateStatement.setInt(5, lvl);
 			preparedUpdateStatement.setString(6, String.valueOf(System.currentTimeMillis()));
 			preparedUpdateStatement.setString(7, player.toString() + "");
-			
 			preparedUpdateStatement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
 			Exp.log.severe("Error: " + e.getMessage());
+		} finally {
+			try {
+				if (preparedUpdateStatement != null) {
+					preparedUpdateStatement.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
         return false;
 	}

@@ -1,122 +1,63 @@
 package net.craftersland.bridge.exp;
 
-import java.io.File;
-import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import net.craftersland.bridge.exp.database.DatabaseManagerMysql;
 import net.craftersland.bridge.exp.database.ExpMysqlInterface;
+import net.craftersland.bridge.exp.database.MysqlSetup;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Exp extends JavaPlugin {
 	
 	public static Logger log;
+	public static String pluginName = "MysqlExperienceBridge";
 	public HashMap<String, Boolean> playersSync = new HashMap<String, Boolean>();
 	
-	private ConfigHandler configHandler;
-	private DatabaseManagerMysql databaseManager;
-	private ExpMysqlInterface expMysqlInterface;
-	private boolean enabled = false;
+	private static ConfigHandler configHandler;
+	private static MysqlSetup databaseManager;
+	private static ExpMysqlInterface expMysqlInterface;
+	private static BackgroundTask bt;
 	
 	@Override
     public void onEnable() {
 		log = getLogger();
-		log.info("Loading MysqlExperienceBridge v"+getDescription().getVersion()+"... ");
-		
-		//Create MysqlExperienceBridge folder
-    	(new File("plugins"+System.getProperty("file.separator")+"MysqlExperienceBridge")).mkdir();
-    	
     	//Load Configuration
     	configHandler = new ConfigHandler(this);
-    	
-    	//Setup Database
-    	log.info("Using MySQL as Datasource...");
-    	databaseManager = new DatabaseManagerMysql(this);
+    	databaseManager = new MysqlSetup(this);
     	expMysqlInterface = new ExpMysqlInterface(this);
-    	
-    	if (databaseManager.getConnection() == null)
-    	{
-    		getServer().getPluginManager().disablePlugin(this);
-            return;
-    	}
-    	
-    	if (getConfigHandler().getString("database.maintenance.enabled").matches("true")) {
-    		runMaintenance();
-    	}
-    	
+    	bt = new BackgroundTask(this);
     	//Register Listeners
     	PluginManager pm = getServer().getPluginManager();
     	pm.registerEvents(new PlayerHandler(this), this);
-    	enabled = true;
-    	log.info("MysqlExperienceBridge has been successfully loaded!");
+    	log.info(pluginName + " loaded successfully!");
 	}
 	
 	@Override
     public void onDisable() {
-		if (enabled == true) {
-			//Closing database connection
-			if (databaseManager.getConnection() != null) {
-				savePlayerData();
-				log.info("Closing MySQL connection...");
-				databaseManager.closeDatabase();
-			}
+		Bukkit.getScheduler().cancelTasks(this);
+		HandlerList.unregisterAll(this);
+		if (databaseManager.getConnection() != null) {
+			bt.onShutDownDataSave();
+			databaseManager.closeConnection();
 		}
-		log.info("MysqlExperienceBridge has been disabled");
+		log.info(pluginName + " is disabled!");
 	}
 	
 	public ConfigHandler getConfigHandler() {
 		return configHandler;
 	}
-	
-	public DatabaseManagerMysql getDatabaseManager() {
+	public MysqlSetup getDatabaseManager() {
 		return databaseManager;
 	}
-	
 	public ExpMysqlInterface getExpMysqlInterface() {
 		return expMysqlInterface;
 	}
-	
-    public void runMaintenance() {
-		
-		Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
-			@Override
-			public void run() {
-				if (databaseManager.getConnection() == null) return;
-				log.info("Database maintenance task started...");
-				
-				long inactivityDays = Long.parseLong(getConfigHandler().getString("database.maintenance.inactivity"));
-				long inactivityMils = inactivityDays * 24 * 60 * 60 * 1000;
-				long curentTime = System.currentTimeMillis();
-				long inactiveTime = curentTime - inactivityMils;
-				String tableName = getConfigHandler().getString("database.mysql.tableName");
-				
-				try {
-					String sql = "DELETE FROM `" + tableName + "` WHERE `last_seen` <?";
-					PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql);
-					preparedStatement.setString(1, String.valueOf(inactiveTime));
-					
-					preparedStatement.executeUpdate();
-				} catch (Exception e) {
-					log.severe("Error: " + e.getMessage());
-				}
-				
-				log.info("Database maintenance task ended.");
-			}
-		}, 400L);	
+	public BackgroundTask getBackgroundTask() {
+		return bt;
 	}
-    
-    private void savePlayerData() {
-    	if (Bukkit.getOnlinePlayers().isEmpty() == true) return;
-		log.info("Saving players data...");
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			if (playersSync.containsKey(p.getName()) == false) return;
-			getExpMysqlInterface().setExperience(p.getUniqueId(), p, p.getExp(), p.getExpToLevel(), p.getTotalExperience(), p.getLevel());
-		}
-    }
 
 }
