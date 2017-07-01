@@ -39,6 +39,15 @@ public class ConfigHandler {
 		}
 	}
 	
+	public String getStringWithColor(String key) {
+		if (!exp.getConfig().contains(key)) {
+			exp.getLogger().severe("Could not locate " + key + " in the config.yml inside of the " + Exp.pluginName + " folder! (Try generating a new one by deleting the current)");
+			return "errorCouldNotLocateInConfigYml:" + key;
+		} else {
+			return exp.getConfig().getString(key).replaceAll("&", "§");
+		}
+	}
+	
 	public Integer getInteger(String key) {
 		if (!exp.getConfig().contains(key)) {
 			exp.getLogger().severe("Could not locate " + key + " in the config.yml inside of the " + Exp.pluginName + " folder! (Try generating a new one by deleting the current)");
