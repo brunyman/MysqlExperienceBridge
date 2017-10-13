@@ -1,5 +1,5 @@
 # default config.yml for MysqlExperienceBridge
-# config version 1.4.1
+# config version 1.5.0
 
 #MySQL Database details
 database:
@@ -16,6 +16,8 @@ database:
         user: 'admin'
         #User password
         password: 'cheesecake'
+        #SSL conection
+        ssl: false
     #Remove inactive users from the database. This maintenance task will start each server start with a 2min delay.
     maintenance:
         #Enable or disable database maintenance.  | (true or false)
