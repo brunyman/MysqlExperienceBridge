@@ -20,7 +20,7 @@ public class PlayerHandler implements Listener {
 		//Check if player has a MySQL account first
 		if (exp.getExpMysqlInterface().hasAccount(event.getPlayer().getUniqueId()) == false) {
 			if (event.getPlayer() != null) {
-				exp.playersSync.put(event.getPlayer().getName(), true);
+				exp.playersSync.add(event.getPlayer());
 			}
 		} else {
 			Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(exp, new Runnable() {
@@ -48,7 +48,7 @@ public class PlayerHandler implements Listener {
 								p.setTotalExperience(mysqlTotalExp);
 								p.setLevel(mysqlLvl);
 							}
-							exp.playersSync.put(p.getName(), true);
+							exp.playersSync.add(p);
 						}
 					});
 				}
@@ -60,7 +60,7 @@ public class PlayerHandler implements Listener {
 	@EventHandler
 	public void onDisconnect(final PlayerQuitEvent event) {
 		if (event.getPlayer() != null) {
-			if (exp.playersSync.containsKey(event.getPlayer()) == true) {
+			if (exp.playersSync.add(event.getPlayer())) {
 				Bukkit.getScheduler().runTaskLaterAsynchronously(exp, new Runnable() {
 					@Override
 					public void run() {

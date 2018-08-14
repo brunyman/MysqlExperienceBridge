@@ -1,7 +1,8 @@
 name: MysqlExperienceBridge
 main: net.craftersland.bridge.exp.Exp
-version: 1.5.0
+version: 1.6.0
 author: CraftersLand
 website: www.craftersland.net
 load: STARTUP
+api-version: 1.13
 description: Sync your experience over many servers using MySQL.

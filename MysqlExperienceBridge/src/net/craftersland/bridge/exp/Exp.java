@@ -1,12 +1,14 @@
 package net.craftersland.bridge.exp;
 
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import net.craftersland.bridge.exp.database.ExpMysqlInterface;
 import net.craftersland.bridge.exp.database.MysqlSetup;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,7 +17,7 @@ public class Exp extends JavaPlugin {
 	
 	public static Logger log;
 	public static String pluginName = "MysqlExperienceBridge";
-	public HashMap<String, Boolean> playersSync = new HashMap<String, Boolean>();
+	public Set<Player> playersSync = new HashSet<Player>();
 	
 	private static ConfigHandler configHandler;
 	private static MysqlSetup databaseManager;
