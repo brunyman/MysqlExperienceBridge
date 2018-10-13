@@ -34,6 +34,10 @@ public class MysqlSetup {
             properties.setProperty("verifyServerCertificate", "false");
             properties.setProperty("useSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
             properties.setProperty("requireSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
+            properties.setProperty("useUnicode", "true");
+            properties.setProperty("characterEncoding", "utf8");
+            properties.setProperty("characterSetResults", "utf8");
+            properties.setProperty("connectionCollation", "utf8mb4_unicode_ci");
             //Connect to database
             conn = DriverManager.getConnection("jdbc:mysql://" + eco.getConfigHandler().getString("database.mysql.host") + ":" + eco.getConfigHandler().getString("database.mysql.port") + "/" + eco.getConfigHandler().getString("database.mysql.databaseName") + "?", properties);
            
@@ -52,7 +56,7 @@ public class MysqlSetup {
 		if (conn != null) {
 			PreparedStatement query = null;
 		      try {	        
-		        String data = "CREATE TABLE IF NOT EXISTS `" + eco.getConfigHandler().getString("database.mysql.tableName") + "` (id int(10) AUTO_INCREMENT, player_uuid varchar(50) NOT NULL UNIQUE, player_name varchar(50) NOT NULL, exp float(10,10) NOT NULL, exp_to_level int(10) NOT NULL, total_exp int(20) NOT NULL, exp_lvl int(10) NOT NULL, last_seen varchar(30) NOT NULL, PRIMARY KEY(id));";
+		        String data = "CREATE TABLE IF NOT EXISTS `" + eco.getConfigHandler().getString("database.mysql.tableName") + "` (id int(10) AUTO_INCREMENT, player_uuid varchar(50) NOT NULL UNIQUE, player_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, exp float(10,10) NOT NULL, exp_to_level int(10) NOT NULL, total_exp int(20) NOT NULL, exp_lvl int(10) NOT NULL, last_seen varchar(30) NOT NULL, PRIMARY KEY(id));";
 		        query = conn.prepareStatement(data);
 		        query.execute();
 		      } catch (SQLException e) {
@@ -109,6 +113,10 @@ public class MysqlSetup {
             properties.setProperty("verifyServerCertificate", "false");
             properties.setProperty("useSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
             properties.setProperty("requireSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
+            properties.setProperty("useUnicode", "true");
+            properties.setProperty("characterEncoding", "utf8");
+            properties.setProperty("characterSetResults", "utf8");
+            properties.setProperty("connectionCollation", "utf8mb4_unicode_ci");
             conn = DriverManager.getConnection("jdbc:mysql://" + eco.getConfigHandler().getString("database.mysql.host") + ":" + eco.getConfigHandler().getString("database.mysql.port") + "/" + eco.getConfigHandler().getString("database.mysql.databaseName"), properties);
 		    end = System.currentTimeMillis();
 		    Exp.log.info("Connection to MySQL server established!");
