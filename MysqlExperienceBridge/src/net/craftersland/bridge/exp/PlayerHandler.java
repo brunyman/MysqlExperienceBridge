@@ -60,7 +60,7 @@ public class PlayerHandler implements Listener {
 	@EventHandler
 	public void onDisconnect(final PlayerQuitEvent event) {
 		if (event.getPlayer() != null) {
-			if (exp.playersSync.add(event.getPlayer())) {
+			if (exp.playersSync.contains(event.getPlayer())) {
 				Bukkit.getScheduler().runTaskLaterAsynchronously(exp, new Runnable() {
 					@Override
 					public void run() {
@@ -70,6 +70,7 @@ public class PlayerHandler implements Listener {
 							int expToLevel = p.getExpToLevel();
 							int totalExp = p.getTotalExperience();
 							int lvl = p.getLevel();
+							exp.playersSync.remove(p);
 							exp.getExpMysqlInterface().setExperience(p.getUniqueId(), p, experience, expToLevel, totalExp, lvl);
 						}
 					}

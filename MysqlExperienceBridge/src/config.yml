@@ -1,5 +1,5 @@
 # default config.yml for MysqlExperienceBridge
-# config version 1.7.0
+# config version 1.7.1
 
 #MySQL Database details
 database:
