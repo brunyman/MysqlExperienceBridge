@@ -109,10 +109,10 @@ public class MysqlSetup {
             properties.setProperty("verifyServerCertificate", "false");
             properties.setProperty("useSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
             properties.setProperty("requireSSL", eco.getConfigHandler().getString("database.mysql.ssl"));
-            properties.setProperty("useUnicode", "true");
-            properties.setProperty("characterEncoding", "utf8");
-            properties.setProperty("characterSetResults", "utf8");
-            properties.setProperty("connectionCollation", "utf8mb4_unicode_ci");
+            //properties.setProperty("useUnicode", "true");
+            //properties.setProperty("characterEncoding", "utf8");
+            //properties.setProperty("characterSetResults", "utf8");
+            //properties.setProperty("connectionCollation", "utf8mb4_unicode_ci");
             conn = DriverManager.getConnection("jdbc:mysql://" + eco.getConfigHandler().getString("database.mysql.host") + ":" + eco.getConfigHandler().getString("database.mysql.port") + "/" + eco.getConfigHandler().getString("database.mysql.databaseName"), properties);
 		    end = System.currentTimeMillis();
 		    Exp.log.info("Connection to MySQL server established!");
